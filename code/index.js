@@ -2,8 +2,6 @@
 const express = require('express');
 const connectDB =require('./connectors/connection');
 const userRoutes = require('./routes/userRoutes');
-const offerRoutes = require('./routes/offerRoutes');
-const productRoutes = require('./routes/productRoutes');
 
 const app = express();
 app.use(express.json());
@@ -11,9 +9,7 @@ const PORT = process.env.PORT || 5000;
 
 connectDB();
 
-app.use('/user', userRoutes);
-app.use('/offer', offerRoutes);
-app.use('/product', productRoutes);
+app.use('/api/user', userRoutes);
 
 // Define a route for the home route ("/")
 app.get('/', (req, res) => {

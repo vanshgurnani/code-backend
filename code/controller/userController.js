@@ -1,36 +1,43 @@
-const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const authMiddleware = require('../middleware/authMiddleware');
 
 
 const login = async (req, res) => {
     try {
-        const { email } = req.body;
+        const { email, password } = req.body;
+
+        // Find the user by email
         const user = await User.findOne({ email });
 
-        if (user) {
-            const token = authMiddleware.generateToken(user);
-            
-            // Log the decoded token to the console
-            const decodedToken = jwt.verify(token, process.env.SECRET);
-            console.log('Decoded Token:', decodedToken);
-            
-            res.status(200).json({ message: 'Login successful', token });
-        } else {
-            res.status(401).json({ error: 'Invalid credentials' });
+        if (!user || user.password !== password) {
+            return res.status(401).json({ error: 'Invalid credentials' });
         }
+
+        // Generate a JWT token
+        const token = authMiddleware.generateToken({
+            email: user.email,
+            id: user._id
+        });
+
+        res.status(200).json({ message: 'Login successful', token });
     } catch (error) {
-        console.error(error);
+        console.error('Login error:', error.message);
         res.status(500).json({ error: 'Server error' });
     }
 };
 
 
+
 const getUserData = async (req, res) => {
     try {
-        const user = await User.findById(req.user.userId);
-        res.status(200).json({ username: user.username });
-        console.log('Decoded Token:', req.user); // Add this line to log the decoded token
+        const userEmail = req.decodedToken.email;
+        const user = await User.findOne({
+            email: userEmail
+        });
+        res.status(200).json({
+            type: 'Success',
+            data: user
+        });
     } catch (error) {
         console.error(error);
         res.status(401).json({ error: 'Unauthorized' });

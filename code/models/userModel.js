@@ -21,6 +21,24 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  createdAt_EP: {
+    type: Number,
+    default: Math.floor(Date.now() / 1000),
+    index: true,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt_EP: {
+    type: Number,
+    default: Math.floor(Date.now() / 1000),
+    index: true,
+  },
 });
 
 const User = mongoose.model('User', userSchema);

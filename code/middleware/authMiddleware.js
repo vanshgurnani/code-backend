@@ -1,21 +1,39 @@
 const jwt = require('jsonwebtoken');
+const configs = require("../configs.json");
 
-const generateToken = (user) => {
-    const { _id, username, role } = user;
-    const secretKey = process.env.SECRET;
-    return jwt.sign({ userId: _id, username: username, role: role }, secretKey);
+const generateToken = ({ email, id }) => {
+    const secretKey = configs.SECRET;
+    const payload = { email, id};
+    const options = { expiresIn: configs.JWT_ACCESS_TOKEN_EXPIRY };
+    const token = jwt.sign(payload, secretKey, options);
+    return token;
 };
 
 const verifyToken = (req, res, next) => {
+    const secretKey = configs.SECRET;
+    const authHeader = req.headers["authorization"];
+    let token = undefined;
+    if (authHeader) {
+        const [bearer, accessToken] = authHeader?.split(" ");
+        if (bearer === "Bearer" && accessToken) {
+            token = accessToken;
+        }
+    }
+
+    if (!token) {
+        return res.status(401).json({
+            error: "Please provide accessToken.",
+        });
+    }
     try {
-        const token = req.headers.authorization.split(' ')[1];
-        const decodedToken = jwt.verify(token, process.env.SECRET);
-        req.user = { userId: decodedToken.userId, username: decodedToken.username, role: decodedToken.role };
-        console.log(req.user);
+        const decodedToken = jwt.verify(token, secretKey);
+        req.decodedToken = decodedToken;
+        console.log("decodedToken: ", decodedToken);
         next();
-    } catch (error) {
-        console.error(error);
-        res.status(401).json({ error: 'Unauthorized' });
+    } catch (err) {
+        return res.status(401).json({
+            error: "Invalid accessToken provided.",
+        });
     }
 };
 

@@ -1,0 +1,5 @@
+{
+    "SECRET": "JPHSab@1234",
+    "JWT_ACCESS_TOKEN_EXPIRY": "720h",
+    "OTP_LENGTH": 4
+}
